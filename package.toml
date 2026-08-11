@@ -7,4 +7,4 @@ authors = ["niksfirefly"]
 license = "MIT"
 
 [plugin]
-entry = "init.lua"
+entry = "main.lua"
