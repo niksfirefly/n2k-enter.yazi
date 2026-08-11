@@ -1,0 +1,10 @@
+[package]
+id = "n2k-enter"
+name = "n2k-enter"
+version = "0.1.0"
+description = "Yazi plugin n2k-enter"
+authors = ["niksfirefly"]
+license = "MIT"
+
+[plugin]
+entry = "init.lua"
