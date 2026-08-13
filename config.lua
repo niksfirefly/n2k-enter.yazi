@@ -22,7 +22,6 @@ return {
         mkv = video,
         webm = video,
         avi = video,
-        jpg = image,
-        png = image,
     },
+    mime = {},
 }
