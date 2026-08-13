@@ -1,12 +1,43 @@
 --- @since 25.5.31
---- @sync entry
+
+local config = require(".config")
+
+local get_hovered = ya.sync(function()
+    local hovered = cx.active.current.hovered
+    if not hovered then return nil end
+
+    return {
+        is_dir = hovered.cha.is_dir,
+        name = hovered.name,
+    }
+end)
+
+local function handler_for(extension)
+    for _, handler in ipairs(config.handlers) do
+        for _, configured_extension in ipairs(handler.extensions) do
+            if extension == configured_extension:lower():gsub("^%.", "") then
+                return handler
+            end
+        end
+    end
+
+    return config.fallback
+end
+
+local function run(handler)
+    ya.emit("shell", {
+        handler.command,
+        block = handler.block,
+        orphan = handler.orphan,
+    })
+end
 
 return {
     entry = function()
-        local hovered = cx.active.current.hovered
+        local hovered = get_hovered()
         if not hovered then return end
 
-        if hovered.cha.is_dir then
+        if hovered.is_dir then
             ya.emit("enter", {})
             return
         end
@@ -14,14 +45,6 @@ return {
         local ext = hovered.name:match("%.([^.]+)$")
         ext = ext and ext:lower() or ""
 
-        if ext == "md" then
-            ya.emit("shell", { "glow -p %h", block = true })
-        elseif ext == "pdf" then
-            ya.emit("shell", { "zathura %h", orphan = true })
-        elseif ext == "mp4" or ext == "mkv" or ext == "webm" or ext == "avi" then
-            ya.emit("shell", { "mpv %h", block = true })
-        else
-            ya.emit("shell", { "${EDITOR:-vi} %h", block = true })
-        end
+        run(handler_for(ext))
     end,
 }
