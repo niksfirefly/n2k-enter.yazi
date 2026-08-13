@@ -1,11 +1,16 @@
 local video = {
-    run = "mpv %h",
-    block = true,
+    run = "smplayer %h",
+    orphan = true,
+}
+
+local image = {
+    run = "nomacs %h",
+    orphan = true,
 }
 
 return {
     extensions = {
-        md = {
+        mdbb = {
             run = "glow -p %h",
             block = true,
         },
@@ -17,9 +22,7 @@ return {
         mkv = video,
         webm = video,
         avi = video,
-    },
-    fallback = {
-        run = "${EDITOR:-vi} %h",
-        block = true,
+        jpg = image,
+        png = image,
     },
 }

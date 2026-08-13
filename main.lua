@@ -1,6 +1,7 @@
 --- @since 25.5.31
 
 local default_config = require(".config")
+local user_config_template = require(".user-config-template").content
 
 local function normalize_extension(extension)
     return tostring(extension):lower():gsub("^%.", "")
@@ -16,8 +17,41 @@ local function user_config_path()
     return home and home .. "/.local/state/yazi/n2k-enter.lua" or nil
 end
 
-local function load_user_config()
+local function ensure_user_config()
     local path = user_config_path()
+    if not path then return nil end
+
+    local url = Url(path)
+    local directory_created, directory_error = fs.create("dir_all", url.parent)
+    if not directory_created then
+        ya.err("n2k-enter: nie można utworzyć katalogu konfiguracji: " .. tostring(directory_error))
+        return path
+    end
+
+    local file, open_error = fs.access():write(true):create_new(true):open(url)
+    if not file then
+        if not open_error or open_error.kind ~= "AlreadyExists" then
+            ya.err("n2k-enter: nie można utworzyć " .. path .. ": " .. tostring(open_error))
+        end
+        return path
+    end
+
+    local written, write_error = file:write_all(user_config_template)
+    if not written then
+        ya.err("n2k-enter: nie można zapisać " .. path .. ": " .. tostring(write_error))
+        return path
+    end
+
+    local flushed, flush_error = file:flush()
+    if not flushed then
+        ya.err("n2k-enter: nie można zapisać " .. path .. ": " .. tostring(flush_error))
+    end
+
+    return path
+end
+
+local function load_user_config()
+    local path = ensure_user_config()
     if not path then return nil end
 
     local file = io.open(path, "r")
@@ -42,7 +76,7 @@ end
 local function merged_config()
     local merged = {
         extensions = {},
-        fallback = default_config.fallback,
+        fallback = nil,
     }
 
     for extension, handler in pairs(default_config.extensions or {}) do
@@ -65,7 +99,7 @@ local function merged_config()
     return merged
 end
 
-local config = merged_config()
+local config
 
 local get_hovered = ya.sync(function()
     local hovered = cx.active.current.hovered
@@ -82,6 +116,11 @@ local function handler_for(extension)
 end
 
 local function run(handler)
+    if not handler then
+        ya.emit("open", { hovered = true })
+        return
+    end
+
     ya.emit("shell", {
         handler.run,
         block = handler.block,
@@ -91,6 +130,8 @@ end
 
 return {
     entry = function()
+        config = config or merged_config()
+
         local hovered = get_hovered()
         if not hovered then return end
 
