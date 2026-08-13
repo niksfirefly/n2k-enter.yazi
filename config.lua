@@ -1,24 +1,25 @@
+local video = {
+    run = "mpv %h",
+    block = true,
+}
+
 return {
-    handlers = {
-        {
-            extensions = { "md" },
-            command = "glow -p %h",
+    extensions = {
+        md = {
+            run = "glow -p %h",
             block = true,
         },
-        {
-            extensions = { "pdf" },
-            command = "zathura %h",
+        pdf = {
+            run = "zathura %h",
             orphan = true,
         },
-        {
-            extensions = { "mp4", "mkv", "webm", "avi" },
-            command = "mpv %h",
-            block = true,
-        },
+        mp4 = video,
+        mkv = video,
+        webm = video,
+        avi = video,
     },
-
     fallback = {
-        command = "${EDITOR:-vi} %h",
+        run = "${EDITOR:-vi} %h",
         block = true,
     },
 }
