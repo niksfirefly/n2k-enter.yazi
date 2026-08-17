@@ -11,11 +11,11 @@ local image = {
 return {
     extensions = {
         lua = {
-            run = "${EDITOR:-vi} %h",
+            run = "${EDITOR:-micro} %h",
             block = true,
         },
         toml = {
-            run = "${EDITOR:-vi} %h",
+            run = "${EDITOR:-micro} %h",
             block = true,
         },
         mdbb = {
@@ -26,10 +26,16 @@ return {
             run = "zathura %h",
             orphan = true,
         },
-        mp4 = video,
-        mkv = video,
-        webm = video,
-        avi = video,
+        mp4 = microdeo,
+        mkv = microdeo,
+        webm = microdeo,
+        amicro = microdeo,
     },
-    mime = {},
+    mime = {
+        {
+            mime = "text/*",
+            run = "${EDITOR:-micro} %h",
+            block = true,
+        },
+    },
 }
