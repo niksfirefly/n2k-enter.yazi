@@ -10,6 +10,14 @@ local image = {
 
 return {
     extensions = {
+        lua = {
+            run = "${EDITOR:-vi} %h",
+            block = true,
+        },
+        toml = {
+            run = "${EDITOR:-vi} %h",
+            block = true,
+        },
         mdbb = {
             run = "glow -p %h",
             block = true,
